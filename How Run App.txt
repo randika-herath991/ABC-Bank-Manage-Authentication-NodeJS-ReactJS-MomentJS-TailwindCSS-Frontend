@@ -1,0 +1,14 @@
+---------------------How Run My Application----------------------
+
+
+
+
+
+1. First Import Database into mysql.
+
+2. Run spring backend, then pass the token with authenticate.
+
+3. Next install node modules into react project loctaion. (npm install)
+
+4. Finally Run your React Script. (npm start)  
+
