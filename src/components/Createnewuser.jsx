@@ -43,6 +43,10 @@ export default function Createnewuser() {
     if (!addres) newErrors.addres = "Address is required.";
     if (!type) newErrors.type = "User type is required.";
 
+    if (!userImage) {
+      newErrors.userImage = "Profile image is required.";
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -87,7 +91,11 @@ export default function Createnewuser() {
       })
       .catch((error) => {
         console.error("Error:", error);
-        toast.error("Error creating user: " + error.message);
+        if (error.response && error.response.data.message) {
+          toast.error(error.response.data.message);
+        } else {
+          toast.error("Error creating user: " + error.message);
+        }
       })
       .finally(() => {
         setIsLoading(false);
@@ -139,6 +147,7 @@ export default function Createnewuser() {
                 <FaUpload className="absolute right-60 mt-25 transform -translate-y-1/2 text-gray-500" />
               </label>
             </div>
+            {errors.userImage && <p className="text-red-500 text-sm">{errors.userImage}</p>}
           </div>
           <div className="flex flex-col text-gray-800 py-2">
             <label>First Name</label>

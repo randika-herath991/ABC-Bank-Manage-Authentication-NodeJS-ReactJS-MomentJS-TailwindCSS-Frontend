@@ -32,6 +32,7 @@ export default function User() {
   const [showModal, setShowModal] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
   const [imageUrl, setImageUrl] = useState({});
+  const [emailError, setEmailError] = useState('');
 
   const navigate = useNavigate();
 
@@ -161,8 +162,8 @@ export default function User() {
         if (column === 'fName' && !(`${user.fName} ${user.lName}`).toLowerCase().includes(filterValue.toLowerCase())) return false;
         if (column === 'addres' && !user.addres.toLowerCase().includes(filterValue.toLowerCase())) return false;
         if (column === 'userEmail' && !user.userEmail.toLowerCase().includes(filterValue.toLowerCase())) return false;
-        if (column === 'type' && !user.type.toLowerCase().includes(filterValue.toLowerCase())) return false;
         if (column === 'status' && filterValue !== 'All Status' && user.active !== (filterValue === 'Active')) return false;
+        if (column === 'type' && filterValue !== 'All User Types' && user.type !== filterValue) return false;
 
         return true;
       });
@@ -185,6 +186,17 @@ export default function User() {
   useEffect(() => {
     applyFilter();
   }, [filters, users]);
+
+  const handleEmailChange = (e) => {
+    const email = e.target.value;
+    setFilters((prev) => ({ ...prev, userEmail: email }));
+    const emailRegex = /^[A-Za-z0-9._%-]+@[A-Za-z0-9._%-]+\.[a-z]{2,3}$/;
+    if (email && !emailRegex.test(email)) {
+      setEmailError('Invalid email format');
+    } else {
+      setEmailError('');
+    }
+  };
 
   const handleDeleteConfirmation = (uId) => {
     setUserToDelete(uId);
@@ -433,13 +445,16 @@ export default function User() {
                 </span>
                 Email
                 {activeFilter === 'userEmail' && (
-                  <input
-                    type="email"
-                    value={filters.userEmail}
-                    onChange={(e) => setFilters((prev) => ({ ...prev, userEmail: e.target.value }))}
-                    className="ml-2 p-1 border rounded"
-                    placeholder="Search by Email"
-                  />
+                  <div>
+                    <input
+                      type="email"
+                      value={filters.userEmail}
+                      onChange={handleEmailChange}
+                      className="ml-2 p-1 border rounded"
+                      placeholder="Search by Email"
+                    />
+                    {emailError && <p className="text-red-500 text-sm">{emailError}</p>}
+                  </div>
                 )}
               </th>
               <th className="px-6 py-3 text-sm font-medium text-gray-900">
@@ -448,13 +463,17 @@ export default function User() {
                 </span>
                 User Type
                 {activeFilter === 'type' && (
-                  <input
-                    type="text"
+                  <select
                     value={filters.type}
-                    onChange={(e) => setFilters((prev) => ({ ...prev, type: e.target.value }))}
+                    onChange={(e) => setFilters({ ...filters, type: e.target.value })}
                     className="ml-2 p-1 border rounded"
-                    placeholder="Search by User Type"
-                  />
+                  >
+                    <option value="" disabled selected hidden className="text-gray">Select User Types</option>
+                    <option value="All User Types">All User Types</option>
+                    <option value="A">Admin</option>
+                    <option value="E">Employee</option>
+                    <option value="C">Customer</option>
+                  </select>
                 )}
               </th>
               <th className="px-6 py-3 text-sm font-medium text-gray-900">

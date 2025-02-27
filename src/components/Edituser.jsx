@@ -83,9 +83,6 @@ export default function Edituser() {
         if (!lName) newErrors.lName = "Last name is required.";
         if (!addres) newErrors.addres = "Address is required.";
         if (!type) newErrors.type = "User type is required.";
-        if (!userImage) {
-            newErrors.userImage = "Profile image is required.";
-        }
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -101,7 +98,10 @@ export default function Edituser() {
         updatedUser.append("userEmail", userEmail);
         updatedUser.append("password", password);
         updatedUser.append("type", type);
-        if (userImage) updatedUser.append("file", userImage);
+
+        if (userImage) {
+            updatedUser.append("file", userImage);
+        }
 
         setIsLoading(true);
         axios.put(`http://localhost:8080/updatebankusers/${uId}`, updatedUser, {
@@ -117,8 +117,12 @@ export default function Edituser() {
             })
             .catch((error) => {
                 setIsLoading(false);
-                console.error('Error updating user:', error.response || error.message);
-                toast.error('Failed to update user!');
+                console.error("Error updating user:", error.response || error.message);
+                if (error.response && error.response.data.message) {
+                    toast.error(error.response.data.message);
+                } else {
+                    toast.error("Failed to update user! " + error.message);
+                }
             });
 
     };

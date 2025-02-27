@@ -25,6 +25,7 @@ export default function UserList() {
   const [pages, setPages] = useState([]);
   const [activeFilter, setActiveFilter] = useState(null);
   const [imageUrl, setImageUrl] = useState({});
+  const [emailError, setEmailError] = useState('');
 
   const navigate = useNavigate();
 
@@ -118,6 +119,17 @@ export default function UserList() {
   useEffect(() => {
     applyFilter();
   }, [filters, users]);
+
+  const handleEmailChange = (e) => {
+    const email = e.target.value;
+    setFilters((prev) => ({ ...prev, userEmail: email }));
+    const emailRegex = /^[A-Za-z0-9._%-]+@[A-Za-z0-9._%-]+\.[a-z]{2,3}$/;
+    if (email && !emailRegex.test(email)) {
+      setEmailError('Invalid email format');
+    } else {
+      setEmailError('');
+    }
+  };
 
   const handleViewUser = (uId) => {
     setTimeout(() => navigate(`/viewemplouser/${uId}`), 2000);
@@ -313,13 +325,16 @@ export default function UserList() {
                 </span>
                 Email
                 {activeFilter === 'userEmail' && (
-                  <input
-                    type="email"
-                    value={filters.userEmail}
-                    onChange={(e) => setFilters((prev) => ({ ...prev, userEmail: e.target.value }))}
-                    className="ml-2 p-1 border rounded"
-                    placeholder="Search by Email"
-                  />
+                  <div>
+                    <input
+                      type="email"
+                      value={filters.userEmail}
+                      onChange={handleEmailChange}
+                      className="ml-2 p-1 border rounded"
+                      placeholder="Search by Email"
+                    />
+                    {emailError && <p className="text-red-500 text-sm">{emailError}</p>}
+                  </div>
                 )}
               </th>
               <th className="px-6 py-3 text-sm font-medium text-gray-900">Actions</th>

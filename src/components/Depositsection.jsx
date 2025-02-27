@@ -29,6 +29,8 @@ export default function Depositsection() {
 
   const navigate = useNavigate();
 
+  const user = JSON.parse(localStorage.getItem('user'));
+
   var jwt = localStorage.getItem("jwt");
 
   useEffect(() => {
@@ -51,23 +53,31 @@ export default function Depositsection() {
   }, []);
 
   useEffect(() => {
-    const jwt = localStorage.getItem('jwt');
-    axios({
-      method: 'get',
-      url: 'http://localhost:8080/bankaccount',
-      headers: {
-        Authorization: `Bearer ${jwt}`,
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, PUT, POST, DELETE, PATCH, OPTIONS',
-      },
-    })
-      .then(res => {
-        setAccounts(res.data.body);
-      })
-      .catch(err => {
-        toast.error("Failed to fetch account IDs.");
-      });
-  }, []);
+    const fetchAccountDetails = async () => {
+      try {
+        if (user && user.bankaccount && user.bankaccount.length > 0) {
+          const accountIds = user.bankaccount.map(account => account.aId);
+
+          const accountsData = await Promise.all(
+            accountIds.map(async (aId) => {
+              const response = await axios.get(`http://localhost:8080/bankaccount/${aId}`, {
+                headers: {
+                  Authorization: `Bearer ${jwt}`,
+                  'Access-Control-Allow-Origin': '*',
+                  'Access-Control-Allow-Methods': 'GET, PUT, POST, DELETE, PATCH, OPTIONS',
+                },
+              });
+              return response.data;
+            })
+          );
+          setAccounts(accountsData);
+        }
+      } catch (err) {
+        toast.error("Failed to fetch account details.");
+      }
+    };
+    fetchAccountDetails();
+  }, [user, jwt]);
 
   const validateForm = () => {
     const newErrors = {};
@@ -155,11 +165,15 @@ export default function Depositsection() {
               onChange={(e) => setAccountId(e.target.value)}
             >
               <option value="" disabled selected hidden className="text-gray">Select Account ID</option>
-              {accounts.map((account) => (
-                <option key={account.aId} value={account.aId}>
-                  {account.aId}
-                </option>
-              ))}
+              {accounts.length > 0 ? (
+                accounts.map((account) => (
+                  <option key={account.aId} value={account.aId}>
+                    {account.aId}
+                  </option>
+                ))
+              ) : (
+                <option disabled>No account available</option>
+              )}
             </select>
             {errors.aId && <p className="text-red-500 text-sm">{errors.aId}</p>}
           </div>

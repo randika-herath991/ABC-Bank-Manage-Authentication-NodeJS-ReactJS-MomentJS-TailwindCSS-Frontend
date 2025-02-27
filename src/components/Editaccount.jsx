@@ -66,7 +66,11 @@ export default function Editaccount() {
             .catch((error) => {
                 setIsLoading(false);
                 console.error('Error updating account:', error.response || error.message);
-                toast.error('Failed to update account!');
+                if (error.response && error.response.data.message) {
+                    toast.error(error.response.data.message);
+                } else {
+                    toast.error("Failed to update account ! " + error.message);
+                }
             });
     };
 
